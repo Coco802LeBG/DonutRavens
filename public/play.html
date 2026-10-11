@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Donut Raven — Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0c0a14;--plum:#171226;--plum-2:#221a38;--line:#33284f;--sheen:#7a6bff;--teal:#3de0c4;--gold:#f4b942;--bone:#ece8f6;--mute:#9d94b8;--ok:#3de0c4;--bad:#ff6b7a;
+--display:'Unbounded','Arial Black',Impact,sans-serif;--body:'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html{height:100%}
+body{margin:0;min-height:100%;background:var(--ink);color:var(--bone);font-family:var(--body);line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+header{position:sticky;top:0;z-index:5;background:rgba(12,10,20,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+header .in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:900;font-size:16px}
+.pill{background:var(--plum);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:14px;display:flex;gap:8px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--bad)} .dot.on{background:var(--ok)}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+.layout{display:grid;grid-template-columns:190px 1fr 320px;gap:16px;align-items:start}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+.card{background:var(--plum);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h3{margin:0 0 12px;font-family:var(--display);font-size:15px}
+.tabs{display:flex;flex-direction:column;gap:6px}
+@media(max-width:1000px){.tabs{flex-direction:row;overflow-x:auto;padding-bottom:4px}.tabs button{white-space:nowrap}}
+.tabs button{text-align:left;font:inherit;font-size:14px;background:var(--plum);color:var(--mute);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--bone);border-color:var(--sheen);background:var(--plum-2)}
+.tabs button[disabled]{opacity:.45;cursor:not-allowed}
+.btn{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:10px;padding:11px 20px;cursor:pointer;background:var(--gold);color:#1a1205}
+.btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--bone);border:1px solid var(--line)} .btn.ghost:hover{border-color:var(--sheen)}
+.btn.sm{padding:7px 12px;font-size:13px}
+label{display:block;font-size:12px;color:var(--mute);margin:12px 0 4px}
+input,select{width:100%;font:inherit;font-size:14px;background:var(--ink);border:1px solid var(--line);color:var(--bone);border-radius:8px;padding:9px 11px}
+input[type=range]{padding:0;accent-color:var(--sheen)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.row>*{flex:0 0 auto} .row>.grow{flex:1 1 120px}
+.seg{display:flex;gap:6px;margin-top:10px}.seg button{flex:1;font:inherit;font-size:13px;background:var(--ink);color:var(--mute);border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer}
+.seg button.on{color:var(--bone);border-color:var(--sheen);background:var(--plum-2)}
+.big{font-family:var(--display);font-weight:900;font-size:34px;margin:16px 0 4px;min-height:44px}
+.win{color:var(--ok)} .lose{color:var(--bad)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;word-break:break-all;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.note{font-size:12.5px;color:var(--mute);margin-top:8px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:360px;margin-top:14px}
+.cell{aspect-ratio:1;font-size:22px;border-radius:10px;border:1px solid var(--line);background:var(--ink);color:var(--bone);cursor:pointer}
+.cell:disabled{cursor:default}.cell.safe{background:rgba(61,224,196,.15);border-color:var(--ok)}.cell.mine{background:rgba(255,107,122,.18);border-color:var(--bad)}
+.lane{display:flex;gap:4px;margin-top:14px;flex-wrap:wrap}.lane span{width:26px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--ink);display:grid;place-items:center;font-size:14px}
+.lane span.done{background:rgba(61,224,196,.15);border-color:var(--ok)}.lane span.here{border-color:var(--gold)}.lane span.dead{background:rgba(255,107,122,.2);border-color:var(--bad)}
+.cards{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}.pc{min-width:46px;padding:10px 8px;text-align:center;border-radius:8px;background:#f3eefb;color:#1a1424;font-weight:700;font-size:18px}.pc.red{color:#c4263a}.pc.back{background:var(--plum-2);color:var(--mute)}
+.bars{display:flex;gap:3px;align-items:flex-end;height:90px;margin-top:14px}.bars div{flex:1;background:var(--plum-2);border-radius:4px 4px 0 0;font-size:9px;text-align:center;color:var(--mute);display:flex;align-items:flex-end;justify-content:center;min-width:0;overflow:hidden}.bars div.hit{background:var(--gold);color:#1a1205}
+.reels{display:flex;gap:10px;margin:14px 0}.reel{flex:1;max-width:100px;aspect-ratio:1;display:grid;place-items:center;border-radius:12px;background:var(--ink);border:1px solid var(--line);font-size:34px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.chip{font:inherit;font-size:13px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--ink);color:var(--bone);cursor:pointer}.chip:hover{border-color:var(--sheen)}.chip.red{border-color:#c4263a}.chip.black{border-color:#888}
+.list{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:5px;font-size:13px}.list li{display:flex;justify-content:space-between;gap:8px;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mute);font-weight:500}
+.msg{border:1px solid var(--line);background:var(--ink);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13.5px}.msg.bad{border-color:var(--bad)}.msg.good{border-color:var(--ok)}
+.code{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;background:var(--bad);color:#2a0710;border-radius:6px;padding:1px 7px;margin-right:6px;font-weight:700}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--plum-2);border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;max-width:90vw;display:none;z-index:20}
+#toast.bad{border-color:var(--bad)}
+.login{max-width:480px;margin:40px auto}
+.hide{display:none!important}
+.stack{display:grid;gap:16px}
+@media (prefers-reduced-motion: no-preference){.pop{animation:pop .3s ease}@keyframes pop{from{transform:scale(.9);opacity:.3}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <a class="logo" href="/">DONUT RAVEN</a>
+  <div class="pill"><span class="dot" id="dot"></span><span id="botTxt">Bot…</span></div>
+  <div id="userBar" class="row hide" style="margin:0">
+    <div class="pill">Balance <b id="bal">0</b></div>
+    <div class="pill" id="who"></div>
+    <button class="btn ghost sm" id="logout">Sign out</button>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <!-- LOGIN -->
+  <div id="login" class="card login">
+    <h3>Sign in with your Minecraft name</h3>
+    <p class="note" style="margin-top:0">No password. You prove it's you by paying the bot a small amount on DonutSMP. That amount goes to your balance.</p>
+    <label for="ign">Minecraft username</label>
+    <input id="ign" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Steve">
+    <div class="row"><button class="btn" id="loginBtn">Continue</button></div>
+    <div id="loginStep" class="hide">
+      <p style="margin:18px 0 6px">On DonutSMP, type this exactly:</p>
+      <div class="mono" id="payCmd"></div>
+      <div class="row"><button class="btn ghost sm" id="copyCmd">Copy command</button></div>
+      <div class="row hide" id="claimRow"><button class="btn" id="claimBtn">I've paid</button></div>
+      <p class="note" id="loginWait">Waiting for your payment… this page signs you in by itself. The code expires in 10 minutes.</p>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="layout hide">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card" id="game"></section>
+    <aside class="stack">
+      <div class="card hide" id="msgCard"><h3>Messages</h3><div id="msgs"></div><div class="row"><button class="btn ghost sm" id="msgOk">Dismiss</button></div></div>
+      <div class="card" id="bank"><h3>Bank</h3>
+        <div class="note" style="margin:0 0 8px">Deposit: on DonutSMP, <b>/pay <span id="botIgn">…</span> amount</b>. It lands here in a few seconds.</div>
+        <div id="claimBox" class="hide"><label for="dpAmt">Already paid? Tell us how much</label><div class="row" style="margin-top:0"><input class="grow" id="dpAmt" placeholder="e.g. 100k" inputmode="decimal"><button class="btn sm" id="dpBtn">I paid</button></div><div class="note">The admin checks the payment in game, then your balance is credited.</div></div>
+        <div id="pendBox" class="note"></div>
+        <div id="wagerNote" class="note"></div>
+        <label for="wd">Withdraw</label>
+        <div class="row" style="margin-top:0"><input class="grow" id="wd" placeholder="e.g. 500k"><button class="btn sm" id="wdBtn">Withdraw</button></div>
+        <div id="wdMsg" class="note"></div>
+      </div>
+      <div class="card"><h3>Provably fair</h3>
+        <label>Server seed hash (committed)</label><div class="mono" id="sHash">…</div>
+        <label for="cs">Your client seed</label>
+        <div class="row" style="margin-top:0"><input class="grow" id="cs" maxlength="32" spellcheck="false"><button class="btn ghost sm" id="csBtn">Save</button></div>
+        <div class="note">Next bet number (nonce): <b id="nonce">0</b></div>
+        <div class="row"><button class="btn ghost sm" id="rotBtn">Rotate &amp; reveal seed</button></div>
+        <div id="revealBox" class="note"></div>
+        <details style="margin-top:12px"><summary class="note" style="cursor:pointer">Verify a result</summary>
+          <label for="vs">Server seed (revealed)</label><input id="vs" spellcheck="false">
+          <label for="vc">Client seed</label><input id="vc" spellcheck="false">
+          <label for="vn">Nonce</label><input id="vn" value="0">
+          <div class="row"><button class="btn ghost sm" id="vBtn">Check</button></div>
+          <div class="note" id="vOut"></div>
+        </details>
+      </div>
+      <div class="card"><h3>My last bets</h3><div style="overflow-x:auto"><table><thead><tr><th>Game</th><th>Bet</th><th>Won</th></tr></thead><tbody id="hist"></tbody></table></div></div>
+    </aside>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+'use strict';
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+let token = null, ME = null, ST = null, CUR = null;
+try { token = localStorage.getItem('rv_token'); } catch {}
+
+/* ---------- utils ---------- */
+const MUL = { k: 1e3, m: 1e6, b: 1e9 };
+const parse = (s) => { const m = String(s).trim().toLowerCase().replace(/[$,\s]/g, '').match(/^(\d+(?:\.\d+)?)([kmb])?$/); return m ? Math.round(parseFloat(m[1]) * (m[2] ? MUL[m[2]] : 1)) : NaN; };
+const fmt = (n) => { const a = Math.abs(n); if (a >= 1e9) return +(n / 1e9).toFixed(2) + 'b'; if (a >= 1e6) return +(n / 1e6).toFixed(2) + 'm'; if (a >= 1e3) return +(n / 1e3).toFixed(2) + 'k'; return String(n); };
+let toastT; function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = bad ? 'bad' : ''; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => (t.style.display = 'none'), 3500); }
+async function api(path, body) {
+  const r = await fetch('/api' + path, { method: body === undefined ? 'GET' : 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const j = await r.json().catch(() => ({ error: 'Network error' }));
+  if (!r.ok) { if (r.status === 401 && token) signOut(); throw new Error(j.error || 'Error'); }
+  return j;
+}
+const guard = (fn) => async (...a) => { try { return await fn(...a); } catch (e) { toast(e.message, true); } };
+const el = (html) => { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; };
+
+/* ---------- status / login ---------- */
+async function loadStatus() {
+  try { ST = await api('/status'); } catch { return; }
+  $('#dot').classList.toggle('on', ST.online); $('#botTxt').textContent = ST.online ? 'Bot online' : 'Bot offline';
+  $('#botIgn').textContent = ST.manual ? 'the admin (name given at sign-in)' : ST.botIgn;
+  $('#claimBox')?.classList.toggle('hide', !ST.reviewDeposits);
+}
+let loginTimer, curLogin = null;
+$('#loginBtn').onclick = guard(async () => {
+  const ign = $('#ign').value.trim();
+  const l = await api('/login', { ign });
+  $('#payCmd').textContent = `/pay ${l.payTo} ${l.payAmount}`;
+  $('#loginStep').classList.remove('hide'); curLogin = l.loginId;
+  $('#claimRow').classList.toggle('hide', !ST?.manual); $('#claimBtn').disabled = false;
+  $('#loginWait').textContent = ST?.manual ? 'After you pay in game, click “I\'ve paid”. The admin confirms it and you are signed in.' : 'Waiting for your payment… this page signs you in by itself. The code expires in 10 minutes.';
+  clearInterval(loginTimer);
+  loginTimer = setInterval(async () => {
+    try {
+      const s = await api('/login/' + l.loginId);
+      if (s.state === 'ok') { clearInterval(loginTimer); token = s.token; try { localStorage.setItem('rv_token', token); } catch {} start(); }
+      if (s.state === 'waiting' && s.review) $('#loginWait').textContent = 'Waiting for the admin to confirm your payment…';
+      if (s.state === 'rejected') { clearInterval(loginTimer); $('#claimRow').classList.add('hide'); $('#loginWait').innerHTML = `<span class="code">${s.code}</span>${String(s.message).replace(/[<>&]/g, "")}`; }
+      if (s.state === 'expired') { clearInterval(loginTimer); $('#loginWait').textContent = 'Code expired. Click Continue to get a new one.'; }
+    } catch {}
+  }, 2500);
+});
+$('#claimBtn').onclick = guard(async () => { await api('/login/claim', { loginId: curLogin }); $('#claimBtn').disabled = true; $('#loginWait').textContent = 'Waiting for the admin to confirm your payment…'; });
+$('#copyCmd').onclick = () => { navigator.clipboard?.writeText($('#payCmd').textContent); toast('Copied'); };
+function signOut() { token = null; try { localStorage.removeItem('rv_token'); } catch {} location.reload(); }
+$('#logout').onclick = signOut;
+
+/* ---------- messages (acceptations / refus avec code) ---------- */
+let seenNotice = 0;
+async function pollNotices() {
+  if (!token) return;
+  try {
+    const n = await api('/notices');
+    $('#msgCard').classList.toggle('hide', !n.length);
+    $('#msgs').innerHTML = n.map((m) => { const bad = m.kind.endsWith('rejected'); return `<div class="msg ${bad ? 'bad' : 'good'}">${m.code ? `<span class="code">${m.code}</span>` : ''}${m.message.replace(/[<>&]/g, '')}</div>`; }).join('');
+    const top = n.length ? n[n.length - 1].id : 0;
+    if (top > seenNotice) { seenNotice = top; toast(n[n.length - 1].message, n[n.length - 1].kind.endsWith('rejected')); refresh(); }
+  } catch {}
+}
+$('#msgOk').onclick = guard(async () => { await api('/notices/read', {}); $('#msgCard').classList.add('hide'); });
+
+/* ---------- me / bank / fairness ---------- */
+async function refresh() {
+  ME = await api('/me');
+  $('#bal').textContent = fmt(ME.balance); $('#who').textContent = ME.ign;
+  $('#sHash').textContent = ME.seed.serverHash; $('#nonce').textContent = ME.seed.nonce;
+  if (document.activeElement !== $('#cs')) $('#cs').value = ME.seed.clientSeed;
+  $('#wagerNote').textContent = ME.wagerRequired > 0 ? `You still need to wager ${fmt(ME.wagerRequired)} before withdrawing.` : 'You can withdraw.';
+  const pd = await api('/pending');
+  $('#pendBox').innerHTML = [...pd.deposits.map((d) => `⏳ Deposit ${fmt(d.amount)} waiting for confirmation`), ...pd.withdrawals.map((w) => `⏳ Withdrawal ${fmt(w.amount)} ${w.status === 'sending' ? 'being sent' : 'waiting for approval'}`)].join('<br>');
+  const h = await api('/history');
+  $('#hist').innerHTML = h.map((b) => `<tr><td>${b.game}</td><td>${fmt(b.stake)}</td><td class="${b.payout >= b.stake ? 'win' : 'lose'}">${fmt(b.payout)}</td></tr>`).join('') || '<tr><td colspan="3" class="note">No bets yet</td></tr>';
+}
+$('#csBtn').onclick = guard(async () => { await api('/seed/client', { seed: $('#cs').value }); toast('Client seed saved'); refresh(); });
+$('#rotBtn').onclick = guard(async () => {
+  const r = await api('/seed/rotate', {}); const v = r.revealed;
+  $('#revealBox').innerHTML = `Previous server seed (nonces 0–${v.lastNonce}):<div class="mono">${v.serverSeed}</div>`;
+  $('#vs').value = v.serverSeed; $('#vc').value = v.clientSeed; refresh();
+});
+$('#dpBtn').onclick = guard(async () => { const a = parse($('#dpAmt').value); if (!(a > 0)) throw new Error('Enter an amount like 100k'); await api('/deposit/claim', { amount: a }); $('#dpAmt').value = ''; toast('Sent. Waiting for the admin to confirm.'); refresh(); });
+$('#wdBtn').onclick = guard(async () => {
+  const a = parse($('#wd').value); if (!(a > 0)) throw new Error('Enter an amount like 500k');
+  const r = await api('/withdraw', { amount: a });
+  $('#wdMsg').textContent = r.status === 'review' ? 'Large withdrawal: it needs manual approval.' : 'Withdrawal queued. The bot will pay you in game.';
+  refresh();
+});
+async function hmacF(server, client, nonce) {
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey('raw', enc.encode(server), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const b = new DataView(await crypto.subtle.sign('HMAC', k, enc.encode(`${client}:${nonce}:0`)));
+  return b.getUint32(0) / 0x100000000;
+}
+$('#vBtn').onclick = guard(async () => {
+  const s = $('#vs').value.trim(), c = $('#vc').value.trim(), n = $('#vn').value.trim();
+  const hb = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)));
+  const hash = [...hb].map((x) => x.toString(16).padStart(2, '0')).join('');
+  const f = await hmacF(s, c, n);
+  $('#vOut').innerHTML = `SHA-256 of seed: <div class="mono">${hash}</div>First number: <b>${f.toFixed(8)}</b><br>Dice roll: <b>${(Math.floor(f * 10000) / 100).toFixed(2)}</b> · Coinflip: <b>${f < 0.5 ? 'heads' : 'tails'}</b> · Crash point: <b>${Math.min(1e6, Math.max(1, Math.floor(94 / (1 - f)) / 100)).toFixed(2)}x</b>`;
+});
+
+/* ---------- shared UI bits ---------- */
+const stakeBox = (def = '10k') => `<label for="stake">Bet</label><div class="row" style="margin-top:0"><input class="grow" id="stake" value="${def}" inputmode="decimal"><button class="btn ghost sm" data-s="half">½</button><button class="btn ghost sm" data-s="dbl">2×</button><button class="btn ghost sm" data-s="max">Max</button></div>`;
+function wireStake(root) {
+  $$('[data-s]', root).forEach((b) => (b.onclick = () => {
+    const v = parse($('#stake', root).value) || ST.minBet; const k = b.dataset.s;
+    const n = k === 'half' ? Math.floor(v / 2) : k === 'dbl' ? v * 2 : Math.min(ME.balance, ST.maxBet);
+    $('#stake', root).value = String(Math.max(ST.minBet, Math.min(n, ST.maxBet)));
+  }));
+}
+const stake = () => { const v = parse($('#stake').value); if (!(v >= ST.minBet)) throw new Error('Minimum bet is ' + fmt(ST.minBet)); return v; };
+const verdict = (r) => (r.payout > r.stake ? `<span class="win">+${fmt(r.payout - r.stake)}</span>` : r.payout === r.stake ? 'Push' : `<span class="lose">−${fmt(r.stake - r.payout)}</span>`);
+const setRes = (html) => { const e = $('#res'); e.innerHTML = html; e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); };
+const play = (fn) => guard(async () => { await fn(); await refresh(); });
+const SUIT = ['♠', '♥', '♦', '♣'];
+const cardHtml = (c) => { const r = c % 13, s = Math.floor(c / 13); return `<div class="pc ${s === 1 || s === 2 ? 'red' : ''}">${['A', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K'][r]}${SUIT[s]}</div>`; };
+
+/* ---------- games ---------- */
+const GAMES = {
+  dice: { label: 'Dice', mount(root) {
+    root.innerHTML = `<h3>Dice</h3>${stakeBox()}<label>Target: <b id="tv">50</b></label><input type="range" id="tg" min="2" max="98" value="50">
+      <div class="seg"><button id="under" class="on">Roll under</button><button id="over">Roll over</button></div>
+      <div class="note" id="info"></div><div class="row"><button class="btn" id="go">Roll</button></div><div class="big" id="res"></div>`;
+    wireStake(root); let over = false;
+    const upd = () => { const t = +$('#tg').value, ch = over ? 100 - t : t; $('#tv').textContent = t; $('#info').textContent = `Win chance ${ch}% · pays ${(94 / ch).toFixed(4)}×`; };
+    $('#tg').oninput = upd; $('#under').onclick = () => { over = false; $('#under').classList.add('on'); $('#over').classList.remove('on'); upd(); };
+    $('#over').onclick = () => { over = true; $('#over').classList.add('on'); $('#under').classList.remove('on'); upd(); }; upd();
+    $('#go').onclick = play(async () => { const r = await api('/bet/dice', { stake: stake(), target: +$('#tg').value, over }); setRes(`<span class="${r.win ? 'win' : 'lose'}">${r.roll.toFixed(2)}</span><div class="note">${verdict(r)}</div>`); });
+  } },
+  coinflip: { label: 'Coinflip', mount(root) {
+    root.innerHTML = `<h3>Coinflip</h3>${stakeBox()}<div class="note">Pays 1.88×</div><div class="row"><button class="btn" data-side="heads">Heads</button><button class="btn ghost" data-side="tails">Tails</button></div><div class="big" id="res"></div>`;
+    wireStake(root);
+    $$('[data-side]', root).forEach((b) => (b.onclick = play(async () => { const r = await api('/bet/coinflip', { stake: stake(), side: b.dataset.side }); setRes(`<span class="${r.win ? 'win' : 'lose'}">${r.result.toUpperCase()}</span><div class="note">${verdict(r)}</div>`); })));
+  } },
+  crash: { label: 'Crash', mount(root) {
+    root.innerHTML = `<h3>Crash</h3>${stakeBox()}<label for="co">Auto cash out at (×)</label><input id="co" value="2.00" inputmode="decimal"><div class="note">You win if the rocket gets at least that far.</div>
+      <div class="row"><button class="btn" id="go">Launch</button></div><div class="big" id="res"></div>`;
+    wireStake(root);
+    $('#go').onclick = play(async () => {
+      const r = await api('/bet/crash', { stake: stake(), cashout: parseFloat($('#co').value) });
+      const box = $('#res'); box.innerHTML = '1.00×'; const end = r.point, t0 = performance.now();
+      await new Promise((ok) => { const tick = () => { const p = Math.min(1, (performance.now() - t0) / 900), v = 1 + (end - 1) * p * p; box.textContent = v.toFixed(2) + '×'; p < 1 ? requestAnimationFrame(tick) : ok(); }; tick(); });
+      setRes(`<span class="${r.win ? 'win' : 'lose'}">${r.point.toFixed(2)}×</span><div class="note">${verdict(r)}</div>`);
+    });
+  } },
+  mines: { label: 'Mines', async mount(root) {
+    root.innerHTML = `<h3>Mines</h3><div id="setup">${stakeBox()}<label for="mc">Mines</label><select id="mc">${[1, 2, 3, 5, 8, 10, 15, 20, 24].map((n) => `<option>${n}</option>`).join('')}</select><div class="row"><button class="btn" id="go">Start</button></div></div>
+      <div id="live" class="hide"><div class="note" id="mi"></div><div class="grid5" id="g"></div><div class="row"><button class="btn" id="cash">Cash out</button></div></div><div class="big" id="res"></div>`;
+    wireStake(root); const cells = [];
+    const g = $('#g'); for (let i = 0; i < 25; i++) { const b = el(`<button class="cell" aria-label="Tile ${i + 1}"></button>`); b.onclick = guard(async () => reveal(i)); g.append(b); cells.push(b); }
+    const show = (live) => { $('#setup').classList.toggle('hide', live); $('#live').classList.toggle('hide', !live); };
+    const info = (mult, stk) => ($('#mi').textContent = `Multiplier ${mult.toFixed(2)}× · cash out now: ${fmt(Math.floor(stk * mult))}`);
+    let stk = 0, mult = 1;
+    const reset = () => cells.forEach((c) => { c.className = 'cell'; c.textContent = ''; c.disabled = false; });
+    const end = (positions, revealed) => { cells.forEach((c, i) => { c.disabled = true; if (positions.includes(i)) { c.classList.add('mine'); c.textContent = '💣'; } }); show(true); $('#cash').classList.add('hide'); };
+    async function reveal(i) {
+      const r = await api('/mines/reveal', { index: i });
+      if (r.hit) { cells[i].textContent = '💥'; end(r.positions); setRes(`<span class="lose">Boom</span><div class="note">−${fmt(stk)}</div>`); }
+      else { cells[i].classList.add('safe'); cells[i].textContent = '💎'; cells[i].disabled = true; mult = r.mult; info(mult, stk); if (r.cleared) { end(r.positions); setRes(`<span class="win">Cleared!</span><div class="note">+${fmt(r.payout - stk)}</div>`); } }
+      await refresh();
+    }
+    $('#go').onclick = play(async () => { stk = stake(); await api('/mines/start', { stake: stk, mines: +$('#mc').value }); reset(); $('#cash').classList.remove('hide'); $('#res').innerHTML = ''; mult = 1; info(1, stk); show(true); });
+    $('#cash').onclick = play(async () => { const r = await api('/mines/cashout', {}); end(r.positions); setRes(`<span class="win">${r.mult.toFixed(2)}×</span><div class="note">+${fmt(r.payout - stk)}</div>`); });
+    const a = (await api('/active/mines')).game;
+    if (a) { stk = a.stake; mult = a.mult; reset(); a.revealed.forEach((i) => { cells[i].classList.add('safe'); cells[i].textContent = '💎'; cells[i].disabled = true; }); info(mult, stk); show(true); }
+  } },
+  plinko: { label: 'Plinko', mount(root) {
+    root.innerHTML = `<h3>Plinko</h3>${stakeBox()}<div class="row"><div class="grow"><label for="rw">Rows</label><select id="rw">${[8, 10, 12, 14, 16].map((n) => `<option ${n === 12 ? 'selected' : ''}>${n}</option>`).join('')}</select></div><div class="grow"><label for="rk">Risk</label><select id="rk"><option>low</option><option selected>medium</option><option>high</option></select></div></div>
+      <div class="bars" id="bars"></div><div class="row"><button class="btn" id="go">Drop</button></div><div class="big" id="res"></div>`;
+    wireStake(root);
+    const bars = guard(async (hit) => { const t = await api(`/plinko?rows=${$('#rw').value}&risk=${$('#rk').value}`); const mx = Math.max(...t); $('#bars').innerHTML = t.map((m, i) => `<div class="${i === hit ? 'hit' : ''}" style="height:${Math.max(14, Math.sqrt(m / mx) * 100)}%">${m >= 10 ? Math.round(m) : m.toFixed(1)}</div>`).join(''); });
+    $('#rw').onchange = () => bars(); $('#rk').onchange = () => bars(); bars();
+    $('#go').onclick = play(async () => { const r = await api('/bet/plinko', { stake: stake(), rows: +$('#rw').value, risk: $('#rk').value }); await bars(r.slot); setRes(`<span class="${r.mult >= 1 ? 'win' : 'lose'}">${r.mult}×</span><div class="note">${verdict(r)}</div>`); });
+  } },
+  roulette: { label: 'Roulette', mount(root) {
+    root.innerHTML = `<h3>Roulette</h3>${stakeBox('5k')}<div class="note">Chip size = the bet above. Click to place chips.</div>
+      <div class="chips" id="ch"></div><div class="row"><input id="num" class="grow" placeholder="Number 0–36" inputmode="numeric"><button class="btn ghost sm" id="addNum">Add number</button></div>
+      <ul class="list" id="bl"></ul><div class="row"><button class="btn" id="go">Spin</button><button class="btn ghost" id="clr">Clear</button></div><div class="big" id="res"></div>`;
+    wireStake(root); let bets = [];
+    const OPT = [['Red', 'red', 0, 'red'], ['Black', 'black', 0, 'black'], ['Even', 'even'], ['Odd', 'odd'], ['1–18', 'low'], ['19–36', 'high'], ['1st 12', 'dozen', 1], ['2nd 12', 'dozen', 2], ['3rd 12', 'dozen', 3], ['Col 1', 'column', 1], ['Col 2', 'column', 2], ['Col 3', 'column', 3]];
+    $('#ch').append(...OPT.map(([l, type, v, cls]) => { const b = el(`<button class="chip ${cls || ''}">${l}</button>`); b.onclick = () => add(type, v, l); return b; }));
+    const draw = () => { $('#bl').innerHTML = bets.map((b, i) => `<li><span>${b.label}</span><span>${fmt(b.stake)} <a href="#" data-i="${i}" style="color:var(--bad)">✕</a></span></li>`).join(''); $$('[data-i]', root).forEach((a) => (a.onclick = (e) => { e.preventDefault(); bets.splice(+a.dataset.i, 1); draw(); })); };
+    const add = guard(async (type, value, label) => { bets.push({ type, value, label, stake: stake() }); draw(); });
+    $('#addNum').onclick = () => { const n = parseInt($('#num').value, 10); if (!(n >= 0 && n <= 36)) return toast('Pick 0 to 36', true); add('straight', n, 'Number ' + n); };
+    $('#clr').onclick = () => { bets = []; draw(); };
+    $('#go').onclick = play(async () => {
+      if (!bets.length) throw new Error('Place at least one chip');
+      const r = await api('/bet/roulette', { bets: bets.map(({ type, value, stake }) => ({ type, value, stake })) });
+      setRes(`<span class="${r.color === 'red' ? 'lose' : r.color === 'green' ? 'win' : ''}">${r.number} ${r.color}</span><div class="note">${verdict(r)}</div>`);
+    });
+    draw();
+  } },
+  slots: { label: 'Slots', mount(root) {
+    const E = { cherry: '🍒', lemon: '🍋', bell: '🔔', gem: '💎', raven: '🐦‍⬛' };
+    root.innerHTML = `<h3>Slots</h3>${stakeBox()}<div class="reels"><div class="reel">❔</div><div class="reel">❔</div><div class="reel">❔</div></div><div class="row"><button class="btn" id="go">Spin</button></div><div class="big" id="res"></div>
+      <table><thead><tr><th>Symbol</th><th>3 of a kind</th><th>First two match</th></tr></thead><tbody>${ST.slots.map((s) => `<tr><td>${E[s.symbol]}</td><td>${s.three}×</td><td>${s.twoFirst}×</td></tr>`).join('')}</tbody></table>`;
+    wireStake(root);
+    $('#go').onclick = play(async () => { const r = await api('/bet/slots', { stake: stake() }); $$('.reel', root).forEach((e, i) => (e.textContent = E[r.reels[i]])); setRes(`<span class="${r.mult >= 1 ? 'win' : 'lose'}">${r.mult}×</span><div class="note">${verdict(r)}</div>`); });
+  } },
+  chicken: { label: 'Chicken', async mount(root) {
+    root.innerHTML = `<h3>Chicken</h3><div id="setup">${stakeBox()}<label for="df">Difficulty</label><select id="df">${Object.entries(ST.chickenDiff).map(([k, p]) => `<option value="${k}">${k} (${Math.round(p * 100)}% safe per step)</option>`).join('')}</select><div class="row"><button class="btn" id="go">Start</button></div></div>
+      <div id="live" class="hide"><div class="note" id="ci"></div><div class="lane" id="ln"></div><div class="row"><button class="btn" id="step">Cross the road</button><button class="btn ghost" id="cash">Cash out</button></div></div><div class="big" id="res"></div>`;
+    wireStake(root); let stk = 0, steps = 0, mult = 1;
+    const lane = (dead) => { $('#ln').innerHTML = Array.from({ length: 20 }, (_, i) => `<span class="${dead && i === steps ? 'dead' : i < steps ? 'done' : i === steps ? 'here' : ''}">${dead && i === steps ? '💥' : i < steps ? '🐔' : ''}</span>`).join(''); };
+    const info = () => ($('#ci').textContent = `Steps ${steps} · ${mult.toFixed(2)}× · cash out now: ${fmt(Math.floor(stk * mult))}`);
+    const show = (l) => { $('#setup').classList.toggle('hide', l); $('#live').classList.toggle('hide', !l); };
+    const over = () => { $('#step').classList.add('hide'); $('#cash').classList.add('hide'); };
+    $('#go').onclick = play(async () => { stk = stake(); await api('/chicken/start', { stake: stk, diff: $('#df').value }); steps = 0; mult = 1; $('#res').innerHTML = ''; $('#step').classList.remove('hide'); $('#cash').classList.remove('hide'); lane(); info(); show(true); });
+    $('#step').onclick = play(async () => { const r = await api('/chicken/step', {}); steps = r.steps; if (!r.alive) { lane(true); over(); setRes(`<span class="lose">Splat</span><div class="note">−${fmt(stk)}</div>`); } else { mult = r.mult; lane(); info(); if (r.done) { over(); setRes(`<span class="win">Made it!</span><div class="note">+${fmt(r.payout - stk)}</div>`); } } });
+    $('#cash').onclick = play(async () => { const r = await api('/chicken/cashout', {}); over(); setRes(`<span class="win">${r.mult.toFixed(2)}×</span><div class="note">+${fmt(r.payout - stk)}</div>`); });
+    const a = (await api('/active/chicken')).game; if (a) { stk = a.stake; steps = a.steps; mult = a.mult; lane(); info(); show(true); }
+  } },
+  blackjack: { label: 'Blackjack', async mount(root) {
+    root.innerHTML = `<h3>Blackjack</h3><div id="setup">${stakeBox()}<div class="note">Blackjack pays 3:2. Dealer stands on 17. No split or insurance.</div><div class="row"><button class="btn" id="go">Deal</button></div></div>
+      <div id="live" class="hide"><div class="note">Dealer <b id="dt"></b></div><div class="cards" id="dc"></div><div class="note">You <b id="pt"></b></div><div class="cards" id="pc"></div>
+      <div class="row" id="acts"><button class="btn" data-a="hit">Hit</button><button class="btn ghost" data-a="stand">Stand</button><button class="btn ghost" data-a="double">Double</button></div></div><div class="big" id="res"></div>`;
+    wireStake(root);
+    const draw = (s) => {
+      $('#setup').classList.add('hide'); $('#live').classList.remove('hide');
+      $('#dc').innerHTML = s.dealer.map(cardHtml).join('') + (s.done ? '' : '<div class="pc back">?</div>'); $('#pc').innerHTML = s.player.map(cardHtml).join('');
+      $('#dt').textContent = s.done ? s.dealerTotal : ''; $('#pt').textContent = s.playerTotal; $('#acts').classList.toggle('hide', s.done);
+      $('[data-a="double"]', root).classList.toggle('hide', s.player.length !== 2);
+      if (s.done) { setRes(verdict({ payout: s.payout, stake: s.stake })); $('#setup').classList.remove('hide'); } else $('#res').innerHTML = '';
+    };
+    $('#go').onclick = play(async () => draw(await api('/blackjack/start', { stake: stake() })));
+    $$('[data-a]', root).forEach((b) => (b.onclick = play(async () => draw(await api('/blackjack/action', { action: b.dataset.a })))));
+    const a = (await api('/active/blackjack')).game; if (a) draw(a);
+  } },
+  unbox: { label: 'Unbox', mount(root) {
+    root.innerHTML = `<h3>Raven crate</h3>${stakeBox()}<div class="row"><button class="btn" id="go">Open crate</button></div><div class="big" id="res"></div>
+      <table><thead><tr><th>Item</th><th>Value</th><th>Chance</th></tr></thead><tbody>${ST.unbox.map((i) => `<tr><td>${i.name}</td><td>${i.mult}×</td><td>${(i.chance * 100).toFixed(2)}%</td></tr>`).join('')}</tbody></table>`;
+    wireStake(root);
+    $('#go').onclick = play(async () => { const r = await api('/bet/unbox', { stake: stake() }); setRes(`<span class="${r.win ? 'win' : 'lose'}">${r.item} · ${r.mult}×</span><div class="note">${verdict(r)}</div>`); });
+  } },
+  jackpot: { label: 'Jackpot (soon)', soon: true }, battles: { label: 'PvP Battles (soon)', soon: true },
+};
+
+function openGame(id) {
+  CUR = id; location.hash = id;
+  $$('#tabs button').forEach((b) => b.setAttribute('aria-selected', b.dataset.id === id));
+  const root = $('#game'); root.innerHTML = ''; GAMES[id].mount(root);
+}
+
+async function start() {
+  $('#login').classList.add('hide'); $('#app').classList.remove('hide'); $('#userBar').classList.remove('hide');
+  $('#tabs').innerHTML = Object.entries(GAMES).map(([id, g]) => `<button role="tab" data-id="${id}" ${g.soon ? 'disabled' : ''}>${g.label}</button>`).join('');
+  $$('#tabs button').forEach((b) => (b.onclick = () => openGame(b.dataset.id)));
+  await guard(refresh)(); pollNotices(); setInterval(pollNotices, 5000);
+  const h = location.hash.slice(1); openGame(GAMES[h] && !GAMES[h].soon ? h : 'dice');
+}
+(async () => { await loadStatus(); setInterval(loadStatus, 20000); if (token) { try { await api('/me'); start(); } catch { signOut(); } } })();
+</script>
+</body>
+</html>

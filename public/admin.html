@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Raven Admin</title>
+<style>
+:root{--ink:#0c0a14;--plum:#171226;--plum-2:#221a38;--line:#33284f;--sheen:#7a6bff;--teal:#3de0c4;--gold:#f4b942;--bone:#ece8f6;--mute:#9d94b8;--ok:#3de0c4;--bad:#ff6b7a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--bone);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+header{position:sticky;top:0;z-index:5;background:rgba(12,10,20,.95);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+h1{margin:0;font-size:17px}h2{margin:0 0 4px;font-size:16px}
+.wrap{max-width:1000px;margin:0 auto;padding:16px;display:grid;gap:18px}
+.pill{background:var(--plum);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:13px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px}.dot.on{background:var(--ok)}
+.card{background:var(--plum);border:1px solid var(--line);border-radius:14px;padding:16px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 12px}
+.item{border:1px solid var(--line);background:var(--ink);border-radius:10px;padding:12px;margin-top:10px}
+.top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.who{font-weight:700}.amt{font-weight:700;color:var(--gold);font-size:18px}
+.meta{font-size:12.5px;color:var(--mute);margin-top:4px}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);margin-left:6px}
+.tag.bot{color:var(--ok);border-color:var(--ok)}.tag.claim{color:var(--gold);border-color:var(--gold)}.tag.warn{color:var(--bad);border-color:var(--bad)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{font:inherit;font-size:13.5px;font-weight:600;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;background:var(--gold);color:#1a1205}
+button.ok{background:var(--ok);color:#06241f}button.no{background:transparent;color:var(--bad);border:1px solid var(--bad)}button.ghost{background:transparent;color:var(--bone);border:1px solid var(--line)}
+button:disabled{opacity:.5}
+select,input{font:inherit;font-size:13.5px;background:var(--plum);border:1px solid var(--line);color:var(--bone);border-radius:8px;padding:7px 10px}
+input{min-width:200px;flex:1}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--plum);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+.empty{color:var(--mute);font-size:13.5px;padding:10px 0}
+.hide{display:none!important}
+#gate{max-width:420px;margin:60px auto}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--plum-2);border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐦‍⬛ Raven Admin</h1>
+  <div class="row" style="margin:0">
+    <span class="pill"><span class="dot" id="dot"></span><span id="botTxt">Bot</span></span>
+    <span class="pill" id="count">0 waiting</span>
+    <button class="ghost" id="out">Lock</button>
+  </div>
+</header>
+
+<div id="gate" class="card">
+  <h2>Admin token</h2>
+  <p class="sub">The ADMIN_TOKEN from your .env file. It stays in this tab only.</p>
+  <div class="row" style="margin-top:0"><input id="tok" type="password" autocomplete="off" placeholder="ADMIN_TOKEN"><button id="go">Unlock</button></div>
+</div>
+
+<div class="wrap hide" id="main">
+  <div class="card"><h2>Deposits to confirm</h2><p class="sub">Check in game that the money really arrived (<span class="mono">/bal</span> or the chat), then accept. Accepting credits the player.</p><div id="deps"></div></div>
+  <div class="card"><h2>Sign-in requests</h2><p class="sub">The player says they paid the login amount. Accept only if you received exactly that amount from that name.</p><div id="logs"></div></div>
+  <div class="card"><h2>Withdrawals</h2><p class="sub">The money is already taken off their balance. “Paid” means you sent it yourself in game. “Refuse” gives it back and sends them your error code.</p><div id="wds"></div></div>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const CODES = { E01: 'Payment not received in game', E02: 'Amount does not match', E03: 'Account under review', E04: 'Wager requirement not met', E05: 'Withdrawal limit exceeded', E06: 'Suspicious activity', E07: 'Try again later', E99: 'Request declined' };
+const $ = (s, e = document) => e.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = (n) => { const a = Math.abs(n); if (a >= 1e9) return +(n / 1e9).toFixed(2) + 'b'; if (a >= 1e6) return +(n / 1e6).toFixed(2) + 'm'; if (a >= 1e3) return +(n / 1e3).toFixed(2) + 'k'; return String(n); };
+const ago = (t) => { const s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 60 ? s + 's ago' : s < 3600 ? Math.round(s / 60) + 'm ago' : Math.round(s / 3600) + 'h ago'; };
+let TOKEN = sessionStorage.getItem('rv_admin') || '', timer, lastCount = 0, Q = null;
+let tt; const toast = (m) => { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(tt); tt = setTimeout(() => (t.style.display = 'none'), 3000); };
+
+async function call(path, body) {
+  const r = await fetch('/api/admin' + path, { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({ error: 'Network error' }));
+  if (r.status === 403) { lock(); throw new Error('Wrong token'); }
+  if (!r.ok) throw new Error(j.error || 'Error');
+  return j;
+}
+function lock() { clearInterval(timer); sessionStorage.removeItem('rv_admin'); TOKEN = ''; $('#gate').classList.remove('hide'); $('#main').classList.add('hide'); }
+$('#out').onclick = lock;
+$('#go').onclick = async () => { TOKEN = $('#tok').value.trim(); try { await call('/queue'); sessionStorage.setItem('rv_admin', TOKEN); open(); } catch (e) { toast(e.message); } };
+function open() { $('#gate').classList.add('hide'); $('#main').classList.remove('hide'); load(); clearInterval(timer); timer = setInterval(load, 4000); }
+
+const userLine = (u) => `balance ${fmt(u.balance || 0)} · deposited ${fmt(u.deposited || 0)} · withdrawn ${fmt(u.withdrawn || 0)} · wagered ${fmt(u.wagered || 0)}${u.banned ? ' <span class="tag warn">banned</span>' : ''}`;
+const rejectForm = (kind, id) => `<div class="rej hide" data-form="${kind}-${id}"><div class="row"><select>${Object.entries(CODES).map(([c, m]) => `<option value="${c}">${c} · ${m}</option>`).join('')}</select><input maxlength="200" placeholder="Extra message for the player (optional)"><button class="no" data-do="reject" data-kind="${kind}" data-id="${id}">Send refusal</button></div></div>`;
+
+function render() {
+  const q = Q; const n = q.deposits.length + q.logins.length + q.withdrawals.filter((w) => w.status === 'review' || w.status === 'check').length;
+  $('#dot').classList.toggle('on', q.bot.online); $('#botTxt').textContent = q.manual ? 'Manual mode' : q.bot.online ? 'Bot online' : 'Bot offline';
+  $('#count').textContent = n + ' waiting'; document.title = (n ? `(${n}) ` : '') + 'Raven Admin';
+  $('#deps').innerHTML = q.deposits.map((d) => `<div class="item"><div class="top"><span class="who">${esc(d.user.banned ? d.ign : d.ign)} <span class="tag ${d.source === 'bot' ? 'bot' : 'claim'}">${d.source === 'bot' ? 'seen by bot' : 'player says they paid'}</span></span><span class="amt">${fmt(d.amount)}</span></div>
+    <div class="meta">${ago(d.created)} · ${userLine(d.user)}${d.raw ? ' · <span class="mono">' + esc(d.raw) + '</span>' : ''}</div>
+    <div class="row"><button class="ok" data-do="accept" data-kind="deposits" data-id="${d.id}">Accept &amp; credit ${fmt(d.amount)}</button><button class="no" data-do="toggle" data-kind="deposits" data-id="${d.id}">Refuse…</button></div>${rejectForm('deposits', d.id)}</div>`).join('') || '<div class="empty">Nothing waiting.</div>';
+  $('#logs').innerHTML = q.logins.map((l) => `<div class="item"><div class="top"><span class="who">${esc(l.ign)}</span><span class="amt">${l.amount}</span></div>
+    <div class="meta">Must have received exactly <b>${l.amount}</b> from <b>${esc(l.ign)}</b> in game.</div>
+    <div class="row"><button class="ok" data-do="accept" data-kind="logins" data-id="${l.id}">Accept &amp; sign in</button><button class="no" data-do="toggle" data-kind="logins" data-id="${l.id}">Refuse…</button></div>${rejectForm('logins', l.id)}</div>`).join('') || '<div class="empty">Nothing waiting.</div>';
+  $('#wds').innerHTML = q.withdrawals.map((w) => `<div class="item"><div class="top"><span class="who">${esc(w.display)} <span class="tag ${w.status === 'check' ? 'warn' : 'claim'}">${w.status}</span></span><span class="amt">${fmt(w.amount)}</span></div>
+    <div class="meta">#${w.id} · ${ago(w.created)} · ${userLine(w.user)}${w.note ? ' · ' + esc(w.note) : ''}</div>
+    ${w.status === 'sending' ? '<div class="meta">The bot is sending it right now.</div>' : `<div class="row"><span class="mono" id="cmd${w.id}">/pay ${esc(w.display)} ${w.amount}</span><button class="ghost" data-do="copy" data-t="/pay ${esc(w.display)} ${w.amount}">Copy</button></div>
+    <div class="row"><button class="ok" data-do="accept" data-kind="withdrawals" data-act="paid" data-id="${w.id}">Paid ✓ (I sent it)</button>${q.bot.online && w.status === 'review' ? `<button class="ghost" data-do="accept" data-kind="withdrawals" data-act="bot" data-id="${w.id}">Send with bot</button>` : ''}<button class="no" data-do="toggle" data-kind="withdrawals" data-id="${w.id}">Refuse…</button></div>${rejectForm('withdrawals', w.id)}`}</div>`).join('') || '<div class="empty">Nothing waiting.</div>';
+}
+async function load() {
+  if (document.querySelector('.rej:not(.hide)') || document.activeElement?.tagName === 'INPUT' && document.activeElement.id !== 'tok') return; // ne pas effacer un refus en cours d'ecriture
+  try { Q = await call('/queue'); render(); const n = Q.deposits.length + Q.logins.length + Q.withdrawals.filter((w) => w.status === 'review').length; if (n > lastCount) { document.title = '🔔 ' + document.title; } lastCount = n; } catch (e) { if (TOKEN) toast(e.message); }
+}
+document.addEventListener('click', async (ev) => {
+  const b = ev.target.closest('[data-do]'); if (!b) return;
+  const { do: act, kind, id } = b.dataset;
+  try {
+    if (act === 'copy') { await navigator.clipboard.writeText(b.dataset.t); return toast('Copied'); }
+    if (act === 'toggle') { $(`[data-form="${kind}-${id}"]`).classList.toggle('hide'); return; }
+    if (act === 'accept') { await call(`/${kind}/${id}/${b.dataset.act || 'accept'}`, {}); toast('Done'); }
+    if (act === 'reject') { const f = b.closest('.rej'); await call(`/${kind}/${id}/reject`, { code: $('select', f).value, message: $('input', f).value }); toast('Refusal sent to the player'); }
+    Q = await call('/queue'); render();
+  } catch (e) { toast(e.message); }
+});
+if (TOKEN) call('/queue').then(open).catch(lock);
+</script>
+</body>
+</html>

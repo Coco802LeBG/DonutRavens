@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Donut Raven — The DonutSMP Casino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0c0a14; --plum:#171226; --plum-2:#221a38; --line:#33284f;
+  --sheen:#7a6bff; --teal:#3de0c4; --gold:#f4b942; --bone:#ece8f6; --mute:#9d94b8;
+  --ok:#3de0c4; --bad:#ff6b7a;
+  --display:'Unbounded','Arial Black',Impact,sans-serif;
+  --body:'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --ink:#0c0a14; --bone:#ece8f6; } }
+:root[data-theme="dark"]{ --ink:#0c0a14; --bone:#ece8f6; }
+html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--ink);color:var(--bone);font-family:var(--body);line-height:1.55;
+  background-image:radial-gradient(900px 500px at 80% -10%,rgba(122,107,255,.22),transparent 60%),radial-gradient(700px 400px at -10% 30%,rgba(61,224,196,.08),transparent 60%);
+  background-repeat:no-repeat}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:rgba(12,10,20,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.logo{font-family:var(--display);font-weight:900;font-size:17px;letter-spacing:.02em;display:flex;align-items:center;gap:10px}
+.logo svg{width:26px;height:26px}
+.links{display:flex;gap:22px;font-size:14px;color:var(--mute)}
+.links a:hover{color:var(--bone)}
+.btn{display:inline-block;font-family:var(--body);font-weight:700;font-size:14px;border:0;border-radius:10px;padding:11px 20px;cursor:pointer;background:var(--gold);color:#1a1205}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--bone);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--sheen)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+@media(max-width:720px){.links{display:none}}
+
+/* hero */
+.hero{padding:72px 0 56px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,6vw,64px);line-height:1.02;margin:0 0 18px;letter-spacing:-.01em}
+h1 span{display:block;background:linear-gradient(100deg,var(--sheen),var(--teal) 60%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:18px;color:var(--mute);max-width:46ch;margin:0 0 28px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.trust{margin-top:22px;font-size:13px;color:var(--mute)}
+.jackpot{background:linear-gradient(160deg,var(--plum-2),var(--plum));border:1px solid var(--line);border-radius:18px;padding:28px;position:relative;overflow:hidden}
+.jackpot::after{content:"";position:absolute;inset:auto -40px -60px auto;width:200px;height:200px;background:radial-gradient(circle,rgba(244,185,66,.25),transparent 65%)}
+.jackpot small{color:var(--mute);font-size:13px}
+.jackpot .amt{font-family:var(--display);font-weight:900;font-size:clamp(30px,5vw,46px);color:var(--gold);margin:6px 0 4px}
+.jackpot p{margin:0;color:var(--mute);font-size:14px}
+@media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:44px}}
+
+h2{font-family:var(--display);font-weight:700;font-size:clamp(24px,3.6vw,36px);margin:0 0 10px;letter-spacing:-.01em}
+.sub{color:var(--mute);max-width:58ch;margin:0 0 30px}
+section{padding:56px 0}
+
+/* games */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.game{background:var(--plum);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:128px}
+.game:hover{border-color:var(--sheen)}
+.game .top{display:flex;justify-content:space-between;align-items:center}
+.game b{font-family:var(--display);font-size:15px}
+.tag{font-size:11px;padding:3px 8px;border-radius:99px;background:var(--plum-2);color:var(--mute);border:1px solid var(--line)}
+.tag.hot{background:rgba(244,185,66,.14);color:var(--gold);border-color:rgba(244,185,66,.4)}
+.game .rtp{margin-top:auto;font-size:13px;color:var(--mute)}
+.game .rtp i{font-style:normal;color:var(--teal);font-weight:700}
+
+/* wins */
+.wins{border:1px dashed var(--line);border-radius:14px;padding:22px;color:var(--mute);font-size:14px;text-align:center}
+
+/* fair */
+.fair{display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;align-items:start}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:18px}
+.steps li{padding-left:18px;border-left:2px solid var(--sheen)}
+.steps b{display:block;margin-bottom:2px}
+.steps span{color:var(--mute);font-size:15px}
+.panel{background:var(--plum);border:1px solid var(--line);border-radius:16px;padding:22px}
+.panel h3{margin:0 0 14px;font-family:var(--display);font-size:16px}
+label{display:block;font-size:12px;color:var(--mute);margin:12px 0 4px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--bone)}
+input{width:100%;font:inherit;font-size:14px;background:var(--ink);border:1px solid var(--line);color:var(--bone);border-radius:8px;padding:9px 11px}
+.row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.roll{font-family:var(--display);font-weight:900;font-size:40px;color:var(--teal);margin:14px 0 2px}
+.hist{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:6px;font-size:13px}
+.hist li{display:flex;justify-content:space-between;gap:10px;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 11px}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
+.note{font-size:12.5px;color:var(--mute);margin-top:12px}
+@media(max-width:860px){.fair{grid-template-columns:1fr}}
+
+/* how */
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.how div{background:var(--plum);border:1px solid var(--line);border-radius:14px;padding:20px}
+.how b{display:block;font-family:var(--display);font-size:15px;margin-bottom:6px}
+.how span{color:var(--mute);font-size:15px}
+
+/* board */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{font:inherit;font-size:13px;background:var(--plum);color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:7px 14px;cursor:pointer}
+.tabs button[aria-pressed="true"]{color:var(--bone);border-color:var(--sheen);background:var(--plum-2)}
+
+footer{border-top:1px solid var(--line);padding:34px 0 40px;color:var(--mute);font-size:13px}
+footer .fl{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px}
+footer .fl a:hover{color:var(--bone)}
+footer p{max-width:80ch;margin:0}
+@media (prefers-reduced-motion: no-preference){
+  .roll.pop{animation:pop .35s ease}
+  @keyframes pop{from{transform:translateY(6px);opacity:.3}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Donut Raven">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#7a6bff" stroke-width="5"/><circle cx="16" cy="16" r="4" fill="#0c0a14"/><path d="M20 6c4 0 7 2 8 5-3-1-5 0-6 2z" fill="#f4b942"/></svg>
+      DONUT RAVEN
+    </a>
+    <div class="links">
+      <a href="#games">Games</a><a href="#fair">Provably fair</a><a href="#how">How it works</a><a href="#board">Leaderboard</a>
+    </div>
+    <a class="btn" href="/play.html">Sign in</a>
+  </div>
+</nav>
+
+<main id="top">
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Take the risk.<span>Keep the shine.</span></h1>
+      <p class="lede">The DonutSMP casino with a raven's eye for fair play. Twelve games, sealed seeds, and every result checkable by you.</p>
+      <div class="cta">
+        <a class="btn" href="/play.html">Sign in &amp; play</a>
+        <a class="btn ghost" href="#fair">Test the fairness</a>
+      </div>
+      <p class="trust">No password · Provably fair · Cash out in seconds</p>
+    </div>
+    <div class="jackpot">
+      <small>Jackpot pool</small>
+      <div class="amt">— coins</div>
+      <p>Opens when the first round starts.</p>
+    </div>
+  </div>
+</div>
+
+<section id="games"><div class="wrap">
+  <h2>Pick your game</h2>
+  <p class="sub">Twelve games, built on seeds you can check. House edge shown on every card.</p>
+  <div class="grid" id="gamegrid"></div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Live wins</h2>
+  <p class="sub">Real bets only. Nothing is staged.</p>
+  <div class="wins">No bets yet. The first big win will show up here.</div>
+</div></section>
+
+<section id="fair"><div class="wrap">
+  <h2>Provably fair, every bet</h2>
+  <p class="sub">You don't have to trust us. Try it below: this runs in your browser with the same math the bot will use.</p>
+  <div class="fair">
+    <ol class="steps">
+      <li><b>We commit first</b><span>Before you bet, we show the SHA-256 hash of our secret server seed. We can't change it afterwards.</span></li>
+      <li><b>You add your seed</b><span>Your client seed is mixed in, so neither side controls the result alone.</span></li>
+      <li><b>Rotate and verify</b><span>When you rotate, we reveal the server seed. Anyone can recompute the hash and every past result.</span></li>
+    </ol>
+
+    <div class="panel">
+      <h3>Fairness check (dice demo)</h3>
+      <label>Server seed hash (committed)</label>
+      <div class="mono" id="hash">…</div>
+      <label for="cs">Your client seed</label>
+      <input id="cs" autocomplete="off" spellcheck="false">
+      <div class="row">
+        <button class="btn" id="rollBtn">Roll</button>
+        <button class="btn ghost" id="rotBtn">Rotate &amp; reveal seed</button>
+      </div>
+      <div class="roll" id="roll">—</div>
+      <div class="note" id="meta">Nonce 0. Result = first 8 hex digits of HMAC-SHA256(serverSeed, clientSeed:nonce), scaled to 0.00–99.99.</div>
+      <ul class="hist" id="hist"></ul>
+      <div id="reveal"></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2>How it works</h2>
+  <p class="sub">Three steps from Minecraft to the table.</p>
+  <div class="how">
+    <div><b>1. Sign in with your IGN</b><span>Only your Minecraft name. You verify with a single in-game payment.</span></div>
+    <div><b>2. Load your coins</b><span>Pay the bot any amount. It lands in your balance when it arrives on the server.</span></div>
+    <div><b>3. Play and cash out</b><span>Withdraw back to DonutSMP whenever you want.</span></div>
+  </div>
+</div></section>
+
+<section id="board"><div class="wrap">
+  <h2>Leaderboard</h2>
+  <p class="sub">Weekly wager race, resets every Monday.</p>
+  <div class="tabs" role="group" aria-label="Leaderboard type">
+    <button aria-pressed="true">Weekly wagers</button><button aria-pressed="false">Biggest wins</button><button aria-pressed="false">Top profit</button><button aria-pressed="false">Most wagered</button>
+  </div>
+  <div class="wins" id="boardbox">No players ranked yet.</div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div class="fl"><a href="#games">Games</a><a href="#fair">Provably fair</a><a href="#board">Leaderboard</a><a href="#">Discord</a><a href="#">Terms</a></div>
+  <p>Virtual DonutSMP currency only, with no real-world monetary value; it cannot be purchased with real money. You must be 18+ to play. Donut Raven is an independent project and is not affiliated with, endorsed by, or connected to Mojang, Microsoft, or the official DonutSMP server. Gamble responsibly: set a limit and take breaks.</p>
+</div></footer>
+
+<script>
+const GAMES=[
+ ["Mines","94%",1],["Crash","94%",0],["Jackpot","94%",0],["Slots","94%",0],
+ ["Coinflip","94%",0],["Chicken","26%–94%",0],["Roulette","93%",0],["Dice","94%",0],
+ ["Blackjack","~99.5%",0],["Plinko","94%",0],["Unbox","94%",0],["PvP Battles","94%",0]
+];
+const G_ID={Mines:'mines',Crash:'crash',Slots:'slots',Coinflip:'coinflip',Chicken:'chicken',Roulette:'roulette',Dice:'dice',Blackjack:'blackjack',Plinko:'plinko',Unbox:'unbox'};
+document.getElementById('gamegrid').innerHTML=GAMES.map(g=>`<a class="game" href="/play.html#${G_ID[g[0]]||''}"><div class="top"><b>${g[0]}</b>${g[2]?'<span class="tag hot">Hot</span>':G_ID[g[0]]?'':'<span class="tag">Soon</span>'}</div><div class="rtp">Return to player <i>${g[1]}</i></div></a>`).join('');
+
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true');
+}));
+
+/* --- provably fair demo --- */
+const enc=new TextEncoder();
+const hex=buf=>[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+const rnd=n=>hex(crypto.getRandomValues(new Uint8Array(n)));
+async function sha(s){return hex(await crypto.subtle.digest('SHA-256',enc.encode(s)))}
+async function hmac(key,msg){
+  const k=await crypto.subtle.importKey('raw',enc.encode(key),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  return hex(await crypto.subtle.sign('HMAC',k,enc.encode(msg)));
+}
+async function rollOf(server,client,nonce){
+  const h=await hmac(server,client+':'+nonce);
+  return (Math.floor(parseInt(h.slice(0,8),16)/0x100000000*10000)/100).toFixed(2);
+}
+let server, nonce=0, bets=[];
+const $=id=>document.getElementById(id);
+async function newRound(){
+  server=rnd(32); nonce=0; bets=[];
+  $('hash').textContent=await sha(server);
+  $('hist').innerHTML=''; $('roll').textContent='—';
+  $('meta').textContent='Nonce 0. Result = first 8 hex digits of HMAC-SHA256(serverSeed, clientSeed:nonce), scaled to 0.00–99.99.';
+}
+async function init(){
+  $('cs').value=rnd(8);
+  await newRound();
+}
+$('rollBtn').addEventListener('click',async()=>{
+  const client=$('cs').value.trim()||'default';
+  const r=await rollOf(server,client,nonce);
+  bets.push({client,nonce,r});
+  const el=$('roll'); el.textContent=r; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  const li=document.createElement('li');
+  li.innerHTML=`<span>Bet #${nonce}</span><span>${r}</span>`;
+  $('hist').prepend(li);
+  nonce++;
+  $('meta').textContent='Nonce '+nonce+'. Rotate to reveal the server seed and verify every roll.';
+});
+$('rotBtn').addEventListener('click',async()=>{
+  const old=server, oldHash=$('hash').textContent, list=bets.slice();
+  const hashOk=(await sha(old))===oldHash;
+  let rows='';
+  for(const b of list){
+    const again=await rollOf(old,b.client,b.nonce);
+    rows+=`<li><span>Bet #${b.nonce} → ${b.r}</span><span class="${again===b.r?'ok':'bad'}">${again===b.r?'verified':'mismatch'}</span></li>`;
+  }
+  $('reveal').innerHTML=`<label>Revealed server seed</label><div class="mono">${old}</div>
+    <p class="note ${hashOk?'ok':'bad'}">SHA-256(seed) ${hashOk?'matches':'does NOT match'} the hash committed before you bet.</p>
+    ${rows?'<ul class="hist">'+rows+'</ul>':'<p class="note">No bets in this round.</p>'}`;
+  await newRound();
+});
+init();
+</script>
+</body>
+</html>
